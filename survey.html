@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Survey Form</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h2>_Surveys</h2>
+            <nav>
+                 <a href="#" onclick="showForm()">FILL OUT SURVEY</a>
+                 <a href="#" onclick="showResults()">VIEW SURVEY RESULTS</a>
+            </nav>
+        </header>
+
+        <div id="formSection">
+        <form id="surveyForm">
+            <h3>Personal Details:</h3>
+            <div class="form-group">
+                <label>Full Names:</label>
+                <input type="text" name="full_name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Date of Birth:</label>
+                <input type="date" name="dob" required>
+            </div>
+
+            <div class="form-group">
+                <label>Contact Number:</label>
+                <input type="text" name="contact_number" required>
+            </div>
+
+            <h3>What is your favorite food?</h3>
+            <div class="checkbox-group center">
+                <label><input type="checkbox" name="food" value="Pizza"> Pizza</label>
+                <label><input type="checkbox" name="food" value="Pasta"> Pasta</label>
+                <label><input type="checkbox" name="food" value="Pap and Wors"> Pap and Wors</label>
+                <label><input type="checkbox" name="food" value="Other"> Other</label>
+            </div>
+
+            <h3>Please rate your level of agreement on a scale from 1 to 5, with 1 being "strongly agree" and 5 being "strongly disagree."</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Strongly Agree</th>
+                            <th>Agree</th>
+                            <th>Neutral</th>
+                            <th>Disagree</th>
+                            <th>Strongly Disagree</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>I like to watch movies</td>
+                            <td><input type="radio" name="q1" value="1" required></td>
+                            <td><input type="radio" name="q1" value="2"></td>
+                            <td><input type="radio" name="q1" value="3"></td>
+                            <td><input type="radio" name="q1" value="4"></td>
+                            <td><input type="radio" name="q1" value="5"></td>
+                        </tr>
+                        <tr>
+                            <td>I like to listen to radio</td>
+                            <td><input type="radio" name="q2" value="1" required></td>
+                            <td><input type="radio" name="q2" value="2"></td>
+                            <td><input type="radio" name="q2" value="3"></td>
+                            <td><input type="radio" name="q2" value="4"></td>
+                            <td><input type="radio" name="q2" value="5"></td>
+                        </tr>
+                        <tr>
+                            <td>I like to eat out</td>
+                            <td><input type="radio" name="q3" value="1" required></td>
+                            <td><input type="radio" name="q3" value="2"></td>
+                            <td><input type="radio" name="q3" value="3"></td>
+                            <td><input type="radio" name="q3" value="4"></td>
+                            <td><input type="radio" name="q3" value="5"></td>
+                        </tr>
+                        <tr>
+                            <td>I like to watch TV</td>
+                            <td><input type="radio" name="q4" value="1" required></td>
+                            <td><input type="radio" name="q4" value="2"></td>
+                            <td><input type="radio" name="q4" value="3"></td>
+                            <td><input type="radio" name="q4" value="4"></td>
+                            <td><input type="radio" name="q4" value="5"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-wrapper">
+                <button type="submit">SUBMIT</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="resultsSection" style="display:none;"></div>
+       
+ <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDV1YFgJXNyeVuRGL_woPdWPTIwpVlD3ec",
+    authDomain: "tshimolong.firebaseapp.com",
+    projectId: "tshimolong",
+    storageBucket: "tshimolong.firebasestorage.app",
+    messagingSenderId: "708731669655",
+    appId: "1:708731669655:web:257efe963ac057e5802dd2"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const questions = [
+    "I like to watch movies",
+    "I like to listen to radio",
+    "I like to eat out",
+    "I like to watch TV"
+  ];
+
+  document.getElementById('surveyForm').addEventListener('submit', async (e) => {
+    console.log("Submit clicked!");
+    e.preventDefault();
+    const form = e.target;
+
+    const foods = Array.from(form.food)
+      .filter(f => f.checked)
+      .map(f => f.value);
+
+    const dob = new Date(form.dob.value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    const ratings = [
+      parseInt(form.q1.value),
+      parseInt(form.q2.value),
+      parseInt(form.q3.value),
+      parseInt(form.q4.value)
+    ];
+
+    await db.collection('surveys').add({
+      full_name: form.full_name.value,
+      email: form.email.value,
+      dob: form.dob.value,
+      contact_number: form.contact_number.value,
+      age,
+      foods,
+      ratings,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    alert("Survey submitted successfully!");
+    form.reset();
+  });
+
+  async function showResults() {
+    document.getElementById('formSection').style.display = 'none';
+    const resultsDiv = document.getElementById('resultsSection');
+    resultsDiv.style.display = 'block';
+
+    const snapshot = await db.collection('surveys').get();
+    const data = snapshot.docs.map(doc => doc.data());
+
+    if (data.length === 0) {
+      resultsDiv.innerHTML = "<h3>No Surveys Available</h3>";
+      return;
+    }
+
+    const total = data.length;
+    const ages = data.map(d => d.age);
+    const avgAge = (ages.reduce((a, b) => a + b, 0) / total).toFixed(1);
+    const maxAge = Math.max(...ages);
+    const minAge = Math.min(...ages);
+
+    const likesPizza = data.filter(d => d.foods.includes("Pizza")).length;
+    const pizzaPercentage = ((likesPizza / total) * 100).toFixed(1);
+
+    const eatOutRatings = data.map(d => d.ratings[2]); // 3rd question
+    const avgEatOutRating = (eatOutRatings.reduce((a, b) => a + b, 0) / total).toFixed(1);
+
+    resultsDiv.innerHTML = `
+      <h3>Survey Results</h3>
+      <p>Total number of surveys: ${total}</p>
+      <p>Average Age: ${avgAge}</p>
+      <p>Oldest Participant: ${maxAge}</p>
+      <p>Youngest Participant: ${minAge}</p>
+      <p>% who like Pizza: ${pizzaPercentage}%</p>
+      <p>Average rating for "I like to eat out": ${avgEatOutRating}</p>
+    `;
+  }
+
+  function showForm() {
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('formSection').style.display = 'block';
+  }
+</script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 850px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 30px;
+            border: 1px solid #444;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #555;
+            font-size: 14px;
+        }
+
+        nav a.active {
+            color: #007BFF;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h3 {
+            align-self: flex-start;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        .form-group label {
+            width: 150px;
+            text-align: left;
+            font-weight: normal;
+        }
+
+        .form-group input {
+            width: 300px;
+            padding: 6px;
+            border: 1px solid #608bdd;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .checkbox-group.center {
+            justify-content: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group label {
+            font-weight: normal;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #608bdd;
+            font-weight: normal;
+        }
+
+        input[type="radio"] {
+            transform: scale(1.1);
+            cursor: pointer;
+        }
+
+        .button-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</body>
+</html>
+
