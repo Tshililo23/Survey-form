@@ -184,8 +184,8 @@
     const data = snapshot.docs.map(doc => doc.data());
 
     if (data.length === 0) {
-      resultsDiv.innerHTML = "<h3>No Surveys Available</h3>";
-      return;
+        resultsDiv.innerHTML = "<h3>No Surveys Available</h3>";
+        return;
     }
 
     const total = data.length;
@@ -194,22 +194,48 @@
     const maxAge = Math.max(...ages);
     const minAge = Math.min(...ages);
 
+    // Calculate food preferences
     const likesPizza = data.filter(d => d.foods.includes("Pizza")).length;
     const pizzaPercentage = ((likesPizza / total) * 100).toFixed(1);
+    
+    const likesPasta = data.filter(d => d.foods.includes("Pasta")).length;
+    const pastaPercentage = ((likesPasta / total) * 100).toFixed(1);
+    
+    const likesPapWors = data.filter(d => d.foods.includes("Pap and Wors")).length;
+    const papWorsPercentage = ((likesPapWors / total) * 100).toFixed(1);
 
-    const eatOutRatings = data.map(d => d.ratings[2]); // 3rd question
+    // Calculate average ratings for all questions
+    const movieRatings = data.map(d => d.ratings[0]);
+    const avgMovieRating = (movieRatings.reduce((a, b) => a + b, 0) / total).toFixed(1);
+    
+    const radioRatings = data.map(d => d.ratings[1]);
+    const avgRadioRating = (radioRatings.reduce((a, b) => a + b, 0) / total).toFixed(1);
+    
+    const eatOutRatings = data.map(d => d.ratings[2]);
     const avgEatOutRating = (eatOutRatings.reduce((a, b) => a + b, 0) / total).toFixed(1);
+    
+    const tvRatings = data.map(d => d.ratings[3]);
+    const avgTvRating = (tvRatings.reduce((a, b) => a + b, 0) / total).toFixed(1);
 
+    // Create centered content with bold heading
     resultsDiv.innerHTML = `
-      <h3>Survey Results</h3>
-      <p>Total number of surveys: ${total}</p>
-      <p>Average Age: ${avgAge}</p>
-      <p>Oldest Participant: ${maxAge}</p>
-      <p>Youngest Participant: ${minAge}</p>
-      <p>% who like Pizza: ${pizzaPercentage}%</p>
-      <p>Average rating for "I like to eat out": ${avgEatOutRating}</p>
-    `;
-  }
+        <div class="results-container">
+            <h3 class="results-heading">Survey Results</h3>
+            <div class="results-content">
+                <p>Total number of surveys : ${total}</p>
+                <p>Average Age : ${avgAge}</p>
+                <p>Oldest person who participated in survey : ${maxAge}</p>
+                <p>Youngest person who participated in survey : ${minAge}</p>
+                <p>Percentage of people who like Pizza : ${pizzaPercentage}%</p>
+                <p>Percentage of people who like Pasta : ${pastaPercentage}%</p>
+                <p>Percentage of people who like Pap and Wors : ${papWorsPercentage}%</p>
+                <p>People who like to watch movies : ${avgMovieRating}</p>
+                <p>People who like to listen to radio : ${avgRadioRating}</p>
+                <p>People who like to eat out : ${avgEatOutRating}</p>
+                <p>People who like to watch TV : ${avgTvRating}</p>
+            </div>
+        </div>`;
+}
 
   function showForm() {
     document.getElementById('resultsSection').style.display = 'none';
@@ -348,6 +374,27 @@
         button:hover {
             background-color: #0056b3;
         }
+
+          .results-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .results-heading {
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+    }
+    
+    .results-content {
+        margin-left: 50px;
+    }
+    
+    .results-content p {
+        margin: 10px 0;
+    }
     </style>
 </body>
 </html>
