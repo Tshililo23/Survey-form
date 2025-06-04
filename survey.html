@@ -9,8 +9,8 @@
         <header>
             <h2>_Surveys</h2>
             <nav>
-                 <a href="#" id="fillSurveyLink" onclick="showForm()">FILL OUT SURVEY</a>
-                 <a href="#" id="viewResultsLink" onclick="showResults()">VIEW SURVEY RESULTS</a>
+                 <a href="#" onclick="showForm()">FILL OUT SURVEY</a>
+                 <a href="#" onclick="showResults()">VIEW SURVEY RESULTS</a>
             </nav>
         </header>
 
@@ -164,21 +164,11 @@
     alert("Survey submitted successfully!");
     form.reset();
   });
-  function showForm() {
-    document.getElementById('resultsSection').style.display = 'none';
-    document.getElementById('formSection').style.display = 'block';
- 
-    document.getElementById('fillSurveyLink').classList.add('active');
-    document.getElementById('viewResultsLink').classList.remove('active');
-}
 
   async function showResults() {
     document.getElementById('formSection').style.display = 'none';
     const resultsDiv = document.getElementById('resultsSection');
     resultsDiv.style.display = 'block';
-
-    document.getElementById('viewResultsLink').classList.add('active');
-    document.getElementById('fillSurveyLink').classList.remove('active');
 
     const snapshot = await db.collection('surveys').get();
     const data = snapshot.docs.map(doc => doc.data());
@@ -215,10 +205,6 @@
     document.getElementById('resultsSection').style.display = 'none';
     document.getElementById('formSection').style.display = 'block';
   }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('fillSurveyLink').classList.add('active');
-});
 </script>
 
     <style>
